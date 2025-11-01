@@ -7,7 +7,7 @@ namespace SPTarkov.Server.Core.Utils;
 
 // TODO: Finish porting this class
 [Injectable(InjectionType.Singleton)]
-public sealed class RandomUtil(ISptLogger<RandomUtil> logger, ICloner cloner)
+public class RandomUtil(ISptLogger<RandomUtil> logger, ICloner cloner)
 {
     private const int DecimalPointRandomPrecision = 6;
 
