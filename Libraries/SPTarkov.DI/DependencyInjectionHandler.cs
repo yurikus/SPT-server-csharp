@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using SPTarkov.DI.Annotations;
 
 namespace SPTarkov.DI;
@@ -160,13 +162,48 @@ public class DependencyInjectionHandler(IServiceCollection serviceCollection)
     {
         switch (injectionType)
         {
+            case InjectionType.HostedService:
+                if (!typeof(IHostedService).IsAssignableFrom(implementationType))
+                {
+                    throw new ArgumentException(
+                        $"Invalid hosted service registration: {implementationType.FullName} does not implement IHostedService.",
+                        nameof(implementationType)
+                    );
+                }
+
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IHostedService), implementationType));
+                break;
             case InjectionType.Singleton:
+                if (registrableInterface == typeof(IHostedService))
+                {
+                    throw new ArgumentException(
+                        $"Invalid injection type on {implementationType.Namespace}.{implementationType.Name}, should be HostedService!",
+                        nameof(injectionType)
+                    );
+                }
+
                 HandleSingletonRegistration(registrableInterface, implementationType);
                 break;
             case InjectionType.Transient:
+                if (registrableInterface == typeof(IHostedService))
+                {
+                    throw new ArgumentException(
+                        $"Invalid injection type on {implementationType.Namespace}.{implementationType.Name}, should be HostedService!",
+                        nameof(injectionType)
+                    );
+                }
+
                 serviceCollection.AddTransient(registrableInterface, implementationType);
                 break;
             case InjectionType.Scoped:
+                if (registrableInterface == typeof(IHostedService))
+                {
+                    throw new ArgumentException(
+                        $"Invalid injection type on {implementationType.Namespace}.{implementationType.Name}, should be HostedService!",
+                        nameof(injectionType)
+                    );
+                }
+
                 serviceCollection.AddScoped(registrableInterface, implementationType);
                 break;
             default:

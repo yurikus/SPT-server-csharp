@@ -16,6 +16,7 @@ public class Injectable(InjectionType injectionType = InjectionType.Transient, T
 
 public enum InjectionType
 {
+    HostedService,
     Singleton,
     Transient,
     Scoped,
