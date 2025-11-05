@@ -194,11 +194,6 @@ public abstract class AbstractPatch : IRuntimePatch
             throw new PatchException($"{GetType().Name}:", ex);
         }
 
-        if (!ModPatchCache.RemovePatch(this))
-        {
-            throw new PatchException($"{GetType().Name}: Target patch not present in cache, a mod is likely externally altering it.");
-        }
-
         IsActive = false;
     }
 
