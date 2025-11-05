@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Constants;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Utils.Json;
 using SPTarkov.Server.Core.Utils.Json.Converters;
 
 namespace SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -432,7 +433,7 @@ public record TemplateItemProperties
     public double? DoubleActionAccuracyPenaltyMult { get; set; }
 
     [JsonPropertyName("ModesCount")]
-    public object? ModesCount { get; set; } // TODO: object here
+    public ListOrT<int>? ModesCount { get; set; }
 
     [JsonPropertyName("DurabilityBurnModificator")]
     public double? DurabilityBurnModificator { get; set; }
@@ -627,11 +628,17 @@ public record TemplateItemProperties
     [JsonPropertyName("ContainerSpawnChanceModifier")]
     public double? ContainerSpawnChanceModifier { get; set; }
 
+    /// <summary>
+    ///     Not used in client, but still exists in the items json
+    /// </summary>
     [JsonPropertyName("SpawnFilter")]
-    public IEnumerable<object>? SpawnFilter { get; set; } // TODO: object here
+    public IEnumerable<object>? SpawnFilter { get; set; }
 
+    /// <summary>
+    ///     Unknown type it is an object[] in the client
+    /// </summary>
     [JsonPropertyName("containType")]
-    public IEnumerable<object>? ContainType { get; set; } // TODO: object here
+    public IEnumerable<object>? ContainType { get; set; }
 
     [JsonPropertyName("sizeWidth")]
     public double? SizeWidth { get; set; }
