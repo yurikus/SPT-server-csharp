@@ -1,4 +1,5 @@
-﻿using SPTarkov.Common.Semver;
+﻿using System.Text.RegularExpressions;
+using SPTarkov.Common.Semver;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
@@ -6,7 +7,12 @@ using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Modding;
 
-public class ModValidator(ISptLogger<ModValidator> logger, ServerLocalisationService localisationService, ISemVer semVer, FileUtil fileUtil)
+public partial class ModValidator(
+    ISptLogger<ModValidator> logger,
+    ServerLocalisationService localisationService,
+    ISemVer semVer,
+    FileUtil fileUtil
+)
 {
     protected readonly Dictionary<string, SptMod> Imported = [];
     protected readonly HashSet<string> SkippedMods = [];
@@ -43,6 +49,22 @@ public class ModValidator(ISptLogger<ModValidator> logger, ServerLocalisationSer
             {
                 // skip error checking and dependency install for mods already marked as skipped.
                 continue;
+            }
+
+            if (!ModGuidRegex().IsMatch(modToValidate.ModGuid))
+            {
+                logger.Error(
+                    localisationService.GetText(
+                        "modloaded-invalid_mod_guid",
+                        new
+                        {
+                            author = modToValidate.Author,
+                            name = modToValidate.Name,
+                            guid = modToValidate.ModGuid,
+                        }
+                    )
+                );
+                errorsFound = true;
             }
 
             // Returns if any mod dependency is not satisfied
@@ -336,4 +358,7 @@ public class ModValidator(ISptLogger<ModValidator> logger, ServerLocalisationSer
 
         return true;
     }
+
+    [GeneratedRegex("^[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*$")]
+    private static partial Regex ModGuidRegex();
 }
