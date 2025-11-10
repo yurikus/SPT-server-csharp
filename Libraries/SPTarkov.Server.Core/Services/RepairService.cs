@@ -587,7 +587,7 @@ public class RepairService(
 
         var doBuff = commonBuffMinChanceValue + commonBuffChanceLevelBonus * skillLevel * durabilityMultiplier;
         var random = new Random();
-        return random.Next() <= doBuff;
+        return random.NextDouble() <= doBuff;
     }
 
     /// <summary>
