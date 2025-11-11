@@ -202,13 +202,13 @@ public class SptWebSocketConnectionHandler(
             {
                 if (logger.IsLogEnabled(LogLevel.Debug))
                 {
-                    logger.Debug(serverLocalisationService.GetText("websocket-not_ready_message_not_sent", sessionID));
+                    logger.Debug(serverLocalisationService.GetText("websocket-not_ready_message_not_sent", sessionID.ToString()));
                 }
             }
         }
         catch (Exception err)
         {
-            logger.Error(serverLocalisationService.GetText("websocket-message_send_failed_with_error"), err);
+            logger.Error(serverLocalisationService.GetText("websocket-message_send_failed_with_error", err.Message), err);
         }
     }
 
