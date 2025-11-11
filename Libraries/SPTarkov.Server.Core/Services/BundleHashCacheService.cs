@@ -41,7 +41,7 @@ public class BundleHashCacheService(ISptLogger<BundleHashCacheService> logger, J
 
     protected async Task StoreValue(string bundlePath, uint hash)
     {
-        _bundleHashes.Add(bundlePath, hash);
+        _bundleHashes[bundlePath] = hash;
 
         var bundleHashesSerialized = jsonUtil.Serialize(_bundleHashes);
 
