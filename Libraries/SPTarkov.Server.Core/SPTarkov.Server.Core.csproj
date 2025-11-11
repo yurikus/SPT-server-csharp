@@ -36,8 +36,10 @@
       Condition="'$(IsPublish)' == 'true'"
       Command="dotnet build -c &quot;$(Configuration)&quot; &quot;$(MSBuildProjectDirectory)/../../Patches/Ceciler.Virtualizer/Ceciler.Virtualizer.csproj&quot;"
     />
+    <!-- Todo: had to set Condition to IsPublish true here, probably not correct? Will check when .Net 10 is officially out and not this pre-release build-->
     <Exec
       ConsoleToMsBuild="true"
+      Condition="'$(IsPublish)' == 'true'"
       Command="dotnet &quot;$(MSBuildProjectDirectory)/../../Ceciler/Ceciler.Launcher.dll&quot; &quot;$(OutDir)SPTarkov.Server.Core.dll&quot; &quot;$(MSBuildProjectDirectory)/../../Patches/Ceciler.Virtualizer/bin/$(Configuration)/$(TargetFramework)/Ceciler.Virtualizer.dll&quot;"
     />
     <!-- Run ExtensionData patch -->

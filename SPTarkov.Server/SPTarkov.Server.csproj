@@ -26,7 +26,7 @@
     <AssemblyName>SPT.Server.Linux</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Libraries\SPTarkov.Reflection\SPTarkov.Reflection.csproj" />
+    <!--<ProjectReference Include="..\Libraries\SPTarkov.Reflection\SPTarkov.Reflection.csproj" /> -->
     <ProjectReference Include="..\Libraries\SPTarkov.Server.Core\SPTarkov.Server.Core.csproj" />
     <ProjectReference Include="..\Libraries\SPTarkov.Server.Assets\SPTarkov.Server.Assets.csproj" />
     <ProjectReference Include="..\Libraries\SPTarkov.Server.Web\SPTarkov.Server.Web.csproj" />
