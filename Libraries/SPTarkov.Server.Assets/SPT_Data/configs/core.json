@@ -25,7 +25,8 @@
     ],
     "removeModItemsFromProfile": false,
     "removeInvalidTradersFromProfile": false,
-    "fixProfileBreakingInventoryItemIssues": false
+    "fixProfileBreakingInventoryItemIssues": false,
+    "renamePreRaidLocales": true
   },
   "survey": {
     "locale": {

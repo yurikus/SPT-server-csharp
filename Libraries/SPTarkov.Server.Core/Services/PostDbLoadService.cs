@@ -136,6 +136,27 @@ public class PostDbLoadService(
         {
             ReplaceScavWavesWithRole(BotConfig.ReplaceScavWith);
         }
+
+        if (CoreConfig.Fixes.RenamePreRaidLocales)
+        {
+            RenamePreraidLocales();
+        }
+    }
+
+    protected void RenamePreraidLocales()
+    {
+        if (databaseService.GetLocales().Global.TryGetValue("en", out var lazyloadedValue))
+        {
+            // We have to add a transformer here, because locales are lazy loaded due to them taking up huge space in memory
+            // The transformer will make sure that each time the locales are requested, the ones changed or added below are included
+            lazyloadedValue.AddTransformer(lazyloadedLocaleData =>
+            {
+                lazyloadedLocaleData["Offline raid test mode"] = "SPT";
+                lazyloadedLocaleData["Offline raid description"] = " ";
+
+                return lazyloadedLocaleData;
+            });
+        }
     }
 
     protected void ReplaceScavWavesWithRole(WildSpawnType newScavRole)

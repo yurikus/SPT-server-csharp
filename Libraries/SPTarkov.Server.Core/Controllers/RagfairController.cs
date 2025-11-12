@@ -1019,7 +1019,7 @@ public class RagfairController(
         var playerOffer = playerProfileOffers?.FirstOrDefault(x => x.Id == offerId);
         if (playerOffer is null)
         {
-            logger.Error(localisationService.GetText("ragfair-offer_not_found_in_profile", new { offerId }));
+            logger.Error(localisationService.GetText("ragfair-offer_not_found_in_profile", new { offerId, profileId = sessionId }));
 
             return httpResponseUtil.AppendErrorToOutput(output, localisationService.GetText("ragfair-offer_not_found_in_profile_short"));
         }

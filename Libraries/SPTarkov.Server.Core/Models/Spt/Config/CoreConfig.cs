@@ -244,6 +244,12 @@ public record GameFixes
     /// </summary>
     [JsonPropertyName("fixProfileBreakingInventoryItemIssues")]
     public bool FixProfileBreakingInventoryItemIssues { get; set; }
+
+    /// <summary>
+    /// Should pre-raid english locales be renamed during raid start
+    /// </summary>
+    [JsonPropertyName("renamePreRaidLocales")]
+    public bool RenamePreRaidLocales { get; set; }
 }
 
 public record ServerFeatures
