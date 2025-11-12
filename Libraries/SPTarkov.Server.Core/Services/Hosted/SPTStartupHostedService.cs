@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Hosting;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Extensions;
@@ -29,84 +31,92 @@ public sealed class SPTStartupHostedService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (ProgramStatics.MODS())
+        try
         {
-            foreach (var mod in loadedMods)
+            if (ProgramStatics.MODS())
             {
-                if (mod.ModMetadata.IsBundleMod == true)
+                foreach (var mod in loadedMods)
                 {
-                    await bundleLoader.LoadBundlesAsync(mod).ConfigureAwait(false);
-                }
-            }
-        }
-
-        if (logger.IsLogEnabled(LogLevel.Debug))
-        {
-            var totalMemoryBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
-
-            // Convert bytes to GB
-            var totalMemoryGb = totalMemoryBytes / (1024.0 * 1024.0 * 1024.0);
-            var pageFileGb = Environment.SystemPageSize / (1024.0 * 1024.0 * 1024.0);
-
-            logger.Debug($"OS: {Environment.OSVersion.Version} | {Environment.OSVersion.Platform}");
-            logger.Debug($"Pagefile: {pageFileGb:F2} GB");
-            logger.Debug($"RAM: {totalMemoryGb:F2} GB");
-            logger.Debug($"Ran as admin: {Environment.IsPrivilegedProcess}");
-            logger.Debug($"CPU cores: {Environment.ProcessorCount}");
-            logger.Debug($"PATH: {(Environment.ProcessPath ?? "null returned").Encode(EncodeType.BASE64)}");
-            logger.Debug($"Server: {ProgramStatics.SPT_VERSION()}");
-
-            // _logger.Debug($"RAM: {(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)}GB");
-
-            if (ProgramStatics.BUILD_TIME() != 0)
-            {
-                logger.Debug($"Date: {ProgramStatics.BUILD_TIME()}");
-            }
-
-            logger.Debug($"Commit: {ProgramStatics.COMMIT()}");
-        }
-
-        // execute onLoad callbacks
-        logger.Info(serverLocalisationService.GetText("executing_startup_callbacks"));
-        foreach (var onLoad in onLoadComponents)
-        {
-            await onLoad.OnLoad(stoppingToken).ConfigureAwait(false);
-        }
-
-        logger.Success(serverLocalisationService.GetText("started_webserver_success", httpServer.ListeningUrl()));
-        logger.Success(serverLocalisationService.GetText("websocket-started", httpServer.ListeningUrl().Replace("https://", "wss://")));
-
-        logger.Success(GetRandomisedStartMessage());
-
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            foreach (var updateable in onUpdateComponents)
-            {
-                var updateableName = updateable.GetType().FullName;
-                if (string.IsNullOrEmpty(updateableName))
-                {
-                    updateableName = $"{updateable.GetType().Namespace}.{updateable.GetType().Name}";
-                }
-
-                var lastRunTimeTimestamp = _onUpdateLastRun.GetValueOrDefault(updateableName, 0);
-                var secondsSinceLastRun = timeUtil.GetTimeStamp() - lastRunTimeTimestamp;
-
-                try
-                {
-                    if (await updateable.OnUpdate(stoppingToken, secondsSinceLastRun).ConfigureAwait(false))
+                    if (mod.ModMetadata.IsBundleMod == true)
                     {
-                        _onUpdateLastRun[updateableName] = timeUtil.GetTimeStamp();
+                        await bundleLoader.LoadBundlesAsync(mod).ConfigureAwait(false);
                     }
                 }
-                catch (Exception err)
-                {
-                    LogUpdateException(err, updateable);
-                }
             }
 
-            await timer.WaitForNextTickAsync(stoppingToken);
+            if (logger.IsLogEnabled(LogLevel.Debug))
+            {
+                var totalMemoryBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+
+                // Convert bytes to GB
+                var totalMemoryGb = totalMemoryBytes / (1024.0 * 1024.0 * 1024.0);
+                var pageFileGb = Environment.SystemPageSize / (1024.0 * 1024.0 * 1024.0);
+
+                logger.Debug($"OS: {Environment.OSVersion.Version} | {Environment.OSVersion.Platform}");
+                logger.Debug($"Pagefile: {pageFileGb:F2} GB");
+                logger.Debug($"RAM: {totalMemoryGb:F2} GB");
+                logger.Debug($"Ran as admin: {Environment.IsPrivilegedProcess}");
+                logger.Debug($"CPU cores: {Environment.ProcessorCount}");
+                logger.Debug($"PATH: {(Environment.ProcessPath ?? "null returned").Encode(EncodeType.BASE64)}");
+                logger.Debug($"Server: {ProgramStatics.SPT_VERSION()}");
+
+                // _logger.Debug($"RAM: {(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)}GB");
+
+                if (ProgramStatics.BUILD_TIME() != 0)
+                {
+                    logger.Debug($"Date: {ProgramStatics.BUILD_TIME()}");
+                }
+
+                logger.Debug($"Commit: {ProgramStatics.COMMIT()}");
+            }
+
+            // execute onLoad callbacks
+            logger.Info(serverLocalisationService.GetText("executing_startup_callbacks"));
+            foreach (var onLoad in onLoadComponents)
+            {
+                await onLoad.OnLoad(stoppingToken).ConfigureAwait(false);
+            }
+
+            logger.Success(serverLocalisationService.GetText("started_webserver_success", httpServer.ListeningUrl()));
+            logger.Success(serverLocalisationService.GetText("websocket-started", httpServer.ListeningUrl().Replace("https://", "wss://")));
+
+            logger.Success(GetRandomisedStartMessage());
+
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                foreach (var updateable in onUpdateComponents)
+                {
+                    var updateableName = updateable.GetType().FullName;
+                    if (string.IsNullOrEmpty(updateableName))
+                    {
+                        updateableName = $"{updateable.GetType().Namespace}.{updateable.GetType().Name}";
+                    }
+
+                    var lastRunTimeTimestamp = _onUpdateLastRun.GetValueOrDefault(updateableName, 0);
+                    var secondsSinceLastRun = timeUtil.GetTimeStamp() - lastRunTimeTimestamp;
+
+                    try
+                    {
+                        if (await updateable.OnUpdate(stoppingToken, secondsSinceLastRun).ConfigureAwait(false))
+                        {
+                            _onUpdateLastRun[updateableName] = timeUtil.GetTimeStamp();
+                        }
+                    }
+                    catch (Exception err)
+                    {
+                        LogUpdateException(err, updateable);
+                    }
+                }
+
+                await timer.WaitForNextTickAsync(stoppingToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Critical("Critical exception, stopping server...", ex);
+            throw;
         }
     }
 

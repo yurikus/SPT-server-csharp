@@ -64,7 +64,7 @@ public static class Program
             Console.WriteLine(
                 "The server has unexpectedly stopped, reach out to #spt-support in discord, create a support thread by following the instructions found in #support-guidelines. Also include a screenshot of this message + the below error"
             );
-            Console.WriteLine(e);
+            Console.WriteLine(ex);
             Console.WriteLine("=========================================================================================================");
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
@@ -134,31 +134,20 @@ public static class Program
         var serverExceptionLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Server");
         // We need any logger instance to use as a finalizer when the app closes
         var loggerFinalizer = app.Services.GetRequiredService<ISptLogger<SPTStartupHostedService>>();
-        try
-        {
-            // Handle edge cases where reverse proxies might pass X-Forwarded-For, use this as the actual IP address
-            var forwardedHeadersOptions = new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-                ForwardLimit = null,
-            };
-            forwardedHeadersOptions.KnownIPNetworks.Clear();
-            forwardedHeadersOptions.KnownProxies.Clear();
-            app.UseForwardedHeaders(forwardedHeadersOptions);
 
-            SetConsoleOutputMode();
+        // Handle edge cases where reverse proxies might pass X-Forwarded-For, use this as the actual IP address
+        var forwardedHeadersOptions = new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            ForwardLimit = null,
+        };
+        forwardedHeadersOptions.KnownIPNetworks.Clear();
+        forwardedHeadersOptions.KnownProxies.Clear();
+        app.UseForwardedHeaders(forwardedHeadersOptions);
 
-            await app.RunAsync();
-        }
-        catch (Exception ex)
-        {
-            serverExceptionLogger.LogCritical(ex, "Critical exception, stopping server...");
-            throw;
-        }
-        finally
-        {
-            loggerFinalizer.DumpAndStop();
-        }
+        SetConsoleOutputMode();
+
+        await app.RunAsync();
     }
 
     private static void ConfigureWebApp(WebApplication app)
