@@ -41,7 +41,7 @@ public class HideoutController(
     FenceService fenceService,
     CircleOfCultistService circleOfCultistService,
     ICloner cloner,
-    ConfigServer configServer
+    HideoutConfig hideoutConfig
 )
 {
     public static readonly MongoId NameTaskConditionCountersCraftingId = new("673f5d6fdd6ed700c703afdc");
@@ -54,8 +54,6 @@ public class HideoutController(
         HideoutAreas.BitcoinFarm,
         HideoutAreas.RestSpace, // Can insert disk
     ];
-
-    protected readonly HideoutConfig HideoutConfig = configServer.GetConfig<HideoutConfig>();
 
     /// <summary>
     ///     Handle HideoutUpgrade event
@@ -860,18 +858,18 @@ public class HideoutController(
         if (area is not null && request.RecipeId != area.LastRecipe)
         // 1 point per craft upon the end of production for alternating between 2 different crafting recipes in the same module
         {
-            craftingExpAmount += HideoutConfig.ExpCraftAmount; // Default is 10
+            craftingExpAmount += hideoutConfig.ExpCraftAmount; // Default is 10
         }
 
         // Update variable with time spent crafting item(s)
         // 1 point per 8 hours of crafting
         totalCraftingHours += recipe.ProductionTime;
-        if (totalCraftingHours / HideoutConfig.HoursForSkillCrafting >= 1)
+        if (totalCraftingHours / hideoutConfig.HoursForSkillCrafting >= 1)
         {
             // Spent enough time crafting to get a bonus xp multiplier
-            var multiplierCrafting = Math.Floor(totalCraftingHours.Value / HideoutConfig.HoursForSkillCrafting);
+            var multiplierCrafting = Math.Floor(totalCraftingHours.Value / hideoutConfig.HoursForSkillCrafting);
             craftingExpAmount += (int)(1 * multiplierCrafting);
-            totalCraftingHours -= HideoutConfig.HoursForSkillCrafting * multiplierCrafting;
+            totalCraftingHours -= hideoutConfig.HoursForSkillCrafting * multiplierCrafting;
         }
 
         // Make sure we can fit both the craft result and tools in the stash
@@ -1528,7 +1526,7 @@ public class HideoutController(
 
             if (
                 profile.CharacterData?.PmcData?.Hideout is not null
-                && profileActivityService.ActiveWithinLastMinutes(sessionId, HideoutConfig.UpdateProfileHideoutWhenActiveWithinMinutes)
+                && profileActivityService.ActiveWithinLastMinutes(sessionId, hideoutConfig.UpdateProfileHideoutWhenActiveWithinMinutes)
             )
             {
                 hideoutHelper.UpdatePlayerHideout(sessionId);

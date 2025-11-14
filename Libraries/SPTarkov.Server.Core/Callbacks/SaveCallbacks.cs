@@ -7,10 +7,8 @@ using SPTarkov.Server.Core.Services;
 namespace SPTarkov.Server.Core.Callbacks;
 
 [Injectable(TypePriority = OnLoadOrder.SaveCallbacks)]
-public class SaveCallbacks(SaveServer saveServer, ConfigServer configServer, BackupService backupService) : IOnLoad, IOnUpdate
+public class SaveCallbacks(SaveServer saveServer, BackupService backupService, CoreConfig coreConfig) : IOnLoad, IOnUpdate
 {
-    protected readonly CoreConfig CoreConfig = configServer.GetConfig<CoreConfig>();
-
     public async Task OnLoad(CancellationToken stoppingToken)
     {
         await saveServer.LoadAsync();
@@ -21,7 +19,7 @@ public class SaveCallbacks(SaveServer saveServer, ConfigServer configServer, Bac
 
     public async Task<bool> OnUpdate(CancellationToken stoppingToken, long secondsSinceLastRun)
     {
-        if (secondsSinceLastRun < CoreConfig.ProfileSaveIntervalInSeconds)
+        if (secondsSinceLastRun < coreConfig.ProfileSaveIntervalInSeconds)
         {
             // Not enough time has passed since last run, exit early
             return false;

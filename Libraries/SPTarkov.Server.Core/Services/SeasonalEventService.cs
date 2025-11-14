@@ -23,7 +23,11 @@ public class SeasonalEventService(
     GiftService giftService,
     ServerLocalisationService serverLocalisationService,
     ProfileHelper profileHelper,
-    ConfigServer configServer,
+    HttpConfig httpConfig,
+    LocationConfig locationConfig,
+    QuestConfig questConfig,
+    SeasonalEventConfig seasonalEventConfig,
+    WeatherConfig weatherConfig,
     RandomUtil randomUtil
 )
 {
@@ -86,12 +90,6 @@ public class SeasonalEventService(
         ItemTpl.FACECOVER_SLENDER_MASK_2,
         ItemTpl.RANDOMLOOTCONTAINER_PUMPKIN_RAND_LOOT_CONTAINER,
     ];
-
-    protected readonly HttpConfig HttpConfig = configServer.GetConfig<HttpConfig>();
-    protected readonly LocationConfig LocationConfig = configServer.GetConfig<LocationConfig>();
-    protected readonly QuestConfig QuestConfig = configServer.GetConfig<QuestConfig>();
-    protected readonly SeasonalEventConfig SeasonalEventConfig = configServer.GetConfig<SeasonalEventConfig>();
-    protected readonly WeatherConfig WeatherConfig = configServer.GetConfig<WeatherConfig>();
 
     /// <summary>
     ///     Get an array of christmas items found in bots inventories as loot
@@ -195,7 +193,7 @@ public class SeasonalEventService(
     /// <returns>true if seasonal events should be checked for</returns>
     public bool IsAutomaticEventDetectionEnabled()
     {
-        return SeasonalEventConfig.EnableSeasonalEventDetection;
+        return seasonalEventConfig.EnableSeasonalEventDetection;
     }
 
     /// <summary>
@@ -205,7 +203,7 @@ public class SeasonalEventService(
     /// <returns>bots with equipment changes</returns>
     protected Dictionary<string, Dictionary<string, Dictionary<MongoId, int>>>? GetEventBotGear(SeasonalEventType eventType)
     {
-        return SeasonalEventConfig.EventGear.GetValueOrDefault(eventType, null);
+        return seasonalEventConfig.EventGear.GetValueOrDefault(eventType, null);
     }
 
     /// <summary>
@@ -215,7 +213,7 @@ public class SeasonalEventService(
     /// <returns>bots with loot changes</returns>
     protected Dictionary<string, Dictionary<string, Dictionary<MongoId, int>>> GetEventBotLoot(SeasonalEventType eventType)
     {
-        return SeasonalEventConfig.EventLoot.GetValueOrDefault(eventType, null);
+        return seasonalEventConfig.EventLoot.GetValueOrDefault(eventType, null);
     }
 
     /// <summary>
@@ -224,7 +222,7 @@ public class SeasonalEventService(
     /// <returns>Record with event name + start/end date</returns>
     public List<SeasonalEvent> GetEventDetails()
     {
-        return SeasonalEventConfig.Events;
+        return seasonalEventConfig.Events;
     }
 
     /// <summary>
@@ -235,7 +233,7 @@ public class SeasonalEventService(
     /// <returns>true if related</returns>
     public bool IsQuestRelatedToEvent(MongoId questId, SeasonalEventType eventType)
     {
-        var eventQuestData = QuestConfig.EventQuests.GetValueOrDefault(questId, null);
+        var eventQuestData = questConfig.EventQuests.GetValueOrDefault(questId, null);
         return eventQuestData?.Season == eventType;
     }
 
@@ -262,7 +260,7 @@ public class SeasonalEventService(
     public bool ForceSeasonalEvent(SeasonalEventType eventType)
     {
         var globalConfig = databaseService.GetGlobals().Configuration;
-        var seasonEvent = SeasonalEventConfig.Events.FirstOrDefault(e => e.Type == eventType);
+        var seasonEvent = seasonalEventConfig.Events.FirstOrDefault(e => e.Type == eventType);
         if (seasonEvent is null)
         {
             logger.Warning($"Unable to force event: {eventType} as it cannot be found in events config");
@@ -306,13 +304,13 @@ public class SeasonalEventService(
     /// <returns>Season enum value</returns>
     public Season GetActiveWeatherSeason()
     {
-        if (WeatherConfig.OverrideSeason.HasValue)
+        if (weatherConfig.OverrideSeason.HasValue)
         {
-            return WeatherConfig.OverrideSeason.Value;
+            return weatherConfig.OverrideSeason.Value;
         }
 
         var currentDate = timeUtil.GetDateTimeNow();
-        foreach (var seasonRange in WeatherConfig.SeasonDates)
+        foreach (var seasonRange in weatherConfig.SeasonDates)
         {
             if (
                 currentDate.DateIsBetweenTwoDates(
@@ -411,7 +409,7 @@ public class SeasonalEventService(
                 RenameBitcoin();
                 if (eventType.Settings is not null && eventType.Settings.ReplaceBotHostility.GetValueOrDefault(false))
                 {
-                    if (SeasonalEventConfig.HostilitySettingsForEvent.TryGetValue("AprilFools", out var botData))
+                    if (seasonalEventConfig.HostilitySettingsForEvent.TryGetValue("AprilFools", out var botData))
                     {
                         ReplaceBotHostility(botData);
                     }
@@ -419,7 +417,7 @@ public class SeasonalEventService(
 
                 if (eventType.Settings?.ForceSeason != null)
                 {
-                    WeatherConfig.OverrideSeason = eventType.Settings.ForceSeason;
+                    weatherConfig.OverrideSeason = eventType.Settings.ForceSeason;
                 }
 
                 break;
@@ -459,7 +457,7 @@ public class SeasonalEventService(
         if (eventType.Settings?.ReplaceBotHostility ?? false)
         {
             ReplaceBotHostility(
-                SeasonalEventConfig.HostilitySettingsForEvent.FirstOrDefault(x => x.Key == "zombies").Value,
+                seasonalEventConfig.HostilitySettingsForEvent.FirstOrDefault(x => x.Key == "zombies").Value,
                 GetLocationsWithZombies(eventType.Settings.ZombieSettings.MapInfectionAmount)
             );
         }
@@ -566,7 +564,7 @@ public class SeasonalEventService(
     /// <param name="season">Season to apply changes for</param>
     protected void AdjustBotAppearanceValues(SeasonalEventType season)
     {
-        if (!SeasonalEventConfig.BotAppearanceChanges.TryGetValue(season, out var appearanceAdjustments))
+        if (!seasonalEventConfig.BotAppearanceChanges.TryGetValue(season, out var appearanceAdjustments))
         {
             // No changes found for this season
             return;
@@ -614,7 +612,7 @@ public class SeasonalEventService(
     )
     {
         var locations = databaseService.GetLocations().GetDictionary();
-        var ignoreList = LocationConfig.NonMaps;
+        var ignoreList = locationConfig.NonMaps;
 
         foreach (var (locationName, locationBase) in locations)
         {
@@ -773,7 +771,7 @@ public class SeasonalEventService(
     {
         databaseService.GetGlobals().Configuration.EventSettings.EventActive = true;
 
-        if (SeasonalEventConfig.HostilitySettingsForEvent.TryGetValue("summon", out var botData))
+        if (seasonalEventConfig.HostilitySettingsForEvent.TryGetValue("summon", out var botData))
         {
             ReplaceBotHostility(botData);
         }
@@ -865,7 +863,7 @@ public class SeasonalEventService(
 
     protected void AddEventWavesToMaps(string eventType)
     {
-        var wavesToAddByMap = SeasonalEventConfig.EventWaves[eventType.ToLowerInvariant()];
+        var wavesToAddByMap = seasonalEventConfig.EventWaves[eventType.ToLowerInvariant()];
 
         if (wavesToAddByMap is null)
         {
@@ -895,7 +893,7 @@ public class SeasonalEventService(
     /// <param name="mapIdWhitelist">OPTIONAL - Maps to add bosses to</param>
     protected void AddEventBossesToMaps(string eventType, HashSet<string>? mapIdWhitelist = null)
     {
-        if (!SeasonalEventConfig.EventBossSpawns.TryGetValue(eventType.ToLowerInvariant(), out var botsToAddPerMap))
+        if (!seasonalEventConfig.EventBossSpawns.TryGetValue(eventType.ToLowerInvariant(), out var botsToAddPerMap))
         {
             logger.Warning($"Unable to add: {eventType} bosses, eventBossSpawns is missing");
             return;
@@ -937,21 +935,21 @@ public class SeasonalEventService(
         switch (eventType)
         {
             case SeasonalEventType.Halloween:
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/5a7c2ebb86f7746e324a06ab.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/5a7c2ebb86f7746e324a06ab.png"] =
                     "./assets/images/traders/halloween/5a7c2ebb86f7746e324a06ab.png";
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/5ac3b86a86f77461491d1ad8.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/5ac3b86a86f77461491d1ad8.png"] =
                     "./assets/images/traders/halloween/5ac3b86a86f77461491d1ad8.png";
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/5c06531a86f7746319710e1b.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/5c06531a86f7746319710e1b.png"] =
                     "./assets/images/traders/halloween/5c06531a86f7746319710e1b.png";
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/59b91ca086f77469a81232e4.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/59b91ca086f77469a81232e4.png"] =
                     "./assets/images/traders/halloween/59b91ca086f77469a81232e4.png";
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/59b91cab86f77469aa5343ca.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/59b91cab86f77469aa5343ca.png"] =
                     "./assets/images/traders/halloween/59b91cab86f77469aa5343ca.png";
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/59b91cb486f77469a81232e5.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/59b91cb486f77469a81232e5.png"] =
                     "./assets/images/traders/halloween/59b91cb486f77469a81232e5.png";
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/59b91cbd86f77469aa5343cb.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/59b91cbd86f77469aa5343cb.png"] =
                     "./assets/images/traders/halloween/59b91cbd86f77469aa5343cb.png";
-                HttpConfig.ServerImagePathOverride["./assets/images/traders/579dc571d53a0658a154fbec.png"] =
+                httpConfig.ServerImagePathOverride["./assets/images/traders/579dc571d53a0658a154fbec.png"] =
                     "./assets/images/traders/halloween/579dc571d53a0658a154fbec.png";
                 break;
             case SeasonalEventType.Christmas:
@@ -1127,7 +1125,7 @@ public class SeasonalEventService(
     /// </summary>
     protected void AddGifterBotToMaps()
     {
-        var gifterSettings = SeasonalEventConfig.GifterSettings;
+        var gifterSettings = seasonalEventConfig.GifterSettings;
         var maps = databaseService.GetLocations().GetDictionary();
         foreach (var gifterMapSettings in gifterSettings)
         {
@@ -1209,7 +1207,7 @@ public class SeasonalEventService(
 
         if (seasonalEvent.Settings?.ForceSeason != null)
         {
-            WeatherConfig.OverrideSeason = seasonalEvent.Settings.ForceSeason;
+            weatherConfig.OverrideSeason = seasonalEvent.Settings.ForceSeason;
         }
 
         if (seasonalEvent.Settings?.AdjustBotAppearances ?? false)
@@ -1239,7 +1237,7 @@ public class SeasonalEventService(
     /// <returns>Bot role as string</returns>
     public string GetBaseRoleForEventBot(string? eventBotRole)
     {
-        return SeasonalEventConfig.EventBotMapping.GetValueOrDefault(eventBotRole, null);
+        return seasonalEventConfig.EventBotMapping.GetValueOrDefault(eventBotRole, null);
     }
 
     /// <summary>
@@ -1247,6 +1245,6 @@ public class SeasonalEventService(
     /// </summary>
     public void EnableSnow()
     {
-        WeatherConfig.OverrideSeason = Season.WINTER;
+        weatherConfig.OverrideSeason = Season.WINTER;
     }
 }

@@ -17,15 +17,13 @@ public class BtrDeliveryCallbacks(
     ISptLogger<BtrDeliveryCallbacks> logger,
     BtrDeliveryService btrDeliveryService,
     TimeUtil timeUtil,
-    ConfigServer configServer,
-    SaveServer saveServer
+    SaveServer saveServer,
+    BtrDeliveryConfig btrDeliveryConfig
 ) : IOnUpdate
 {
-    protected readonly BtrDeliveryConfig BtrDeliveryConfig = configServer.GetConfig<BtrDeliveryConfig>();
-
     public Task<bool> OnUpdate(CancellationToken stoppingToken, long secondsSinceLastRun)
     {
-        if (secondsSinceLastRun < BtrDeliveryConfig.RunIntervalSeconds)
+        if (secondsSinceLastRun < btrDeliveryConfig.RunIntervalSeconds)
         {
             return Task.FromResult(false);
         }

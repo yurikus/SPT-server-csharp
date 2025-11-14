@@ -25,9 +25,8 @@ using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services.Hosted;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Server.Logger;
+using SPTarkov.Server.Middleware;
 using SPTarkov.Server.Modding;
-using SPTarkov.Server.Services;
 using SPTarkov.Server.Web;
 
 namespace SPTarkov.Server;
@@ -175,7 +174,7 @@ public static class Program
             {
                 // This method is not expected to be async so we need to wait for the Task instead of using await keyword
                 options.ApplicationServices.GetRequiredService<OnWebAppBuildModLoader>().OnLoad().Wait();
-                var httpConfig = options.ApplicationServices.GetRequiredService<ConfigServer>().GetConfig<HttpConfig>();
+                var httpConfig = options.ApplicationServices.GetRequiredService<HttpConfig>();
 
                 // Probe the http ip and port to see if its being used, this method will throw an exception and crash
                 // the server if the IP/Port combination is already in use

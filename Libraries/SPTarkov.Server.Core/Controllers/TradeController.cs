@@ -1,3 +1,4 @@
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Helpers;
@@ -9,7 +10,6 @@ using SPTarkov.Server.Core.Models.Eft.Ragfair;
 using SPTarkov.Server.Core.Models.Eft.Trade;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
@@ -32,12 +32,10 @@ public class TradeController(
     HttpResponseUtil httpResponseUtil,
     ServerLocalisationService serverLocalisationService,
     MailSendService mailSendService,
-    ConfigServer configServer
+    RagfairConfig ragfairConfig,
+    TraderConfig traderConfig
 )
 {
-    protected readonly RagfairConfig RagfairConfig = configServer.GetConfig<RagfairConfig>();
-    protected readonly TraderConfig TraderConfig = configServer.GetConfig<TraderConfig>();
-
     /// <summary>
     ///     Handle TradingConfirm event
     /// </summary>
@@ -52,7 +50,7 @@ public class TradeController(
         // Buying
         if (request.Type == "buy_from_trader")
         {
-            var foundInRaid = TraderConfig.PurchasesAreFoundInRaid;
+            var foundInRaid = traderConfig.PurchasesAreFoundInRaid;
             var buyData = (ProcessBuyTradeRequestData)request;
             tradeHelper.BuyItem(pmcData, buyData, sessionID, foundInRaid, output);
 
@@ -167,7 +165,7 @@ public class TradeController(
             SchemeId = 0,
             SchemeItems = requestOffer.Items,
         };
-        tradeHelper.BuyItem(pmcData, buyData, sessionId, TraderConfig.PurchasesAreFoundInRaid, output);
+        tradeHelper.BuyItem(pmcData, buyData, sessionId, traderConfig.PurchasesAreFoundInRaid, output);
 
         // Remove/lower offer quantity of item purchased from trader flea offer
         ragfairServer.ReduceOfferQuantity(fleaOffer.Id, requestOffer.Count ?? 0);
@@ -201,7 +199,7 @@ public class TradeController(
         };
 
         // buyItem() must occur prior to removing the offer stack, otherwise item inside offer doesn't exist for confirmTrading() to use
-        tradeHelper.BuyItem(pmcData, buyData, sessionId, RagfairConfig.Dynamic.PurchasesAreFoundInRaid, output);
+        tradeHelper.BuyItem(pmcData, buyData, sessionId, ragfairConfig.Dynamic.PurchasesAreFoundInRaid, output);
         if (output.Warnings?.Count > 0)
         {
             return;

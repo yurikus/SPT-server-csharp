@@ -1,11 +1,10 @@
 using System.Runtime;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Servers;
 
-namespace SPTarkov.Server.Services;
+namespace SPTarkov.Server.Middleware;
 
 // ReSharper disable once InconsistentNaming
-public class NoGCRegionMiddleware(RequestDelegate next)
+public class NoGCRegionMiddleware(CoreConfig coreConfig, RequestDelegate next)
 {
     private static long _activeRequests;
 
@@ -18,18 +17,16 @@ public class NoGCRegionMiddleware(RequestDelegate next)
     {
         Interlocked.Increment(ref _activeRequests);
 
-        var config = context.RequestServices.GetRequiredService<ConfigServer>().GetConfig<CoreConfig>();
-
         // if no other requests are running, start the no GC region, otherwise dont start it
         if (!OtherRequestsActive)
         {
-            if (config.EnableNoGCRegions && GCSettings.LatencyMode != GCLatencyMode.NoGCRegion)
+            if (coreConfig.EnableNoGCRegions && GCSettings.LatencyMode != GCLatencyMode.NoGCRegion)
             {
                 try
                 {
                     GC.TryStartNoGCRegion(
-                        1024L * 1024L * 1024L * config.NoGCRegionMaxMemoryGB,
-                        1024L * 1024L * 1024L * config.NoGCRegionMaxLOHMemoryGB,
+                        1024L * 1024L * 1024L * coreConfig.NoGCRegionMaxMemoryGB,
+                        1024L * 1024L * 1024L * coreConfig.NoGCRegionMaxLOHMemoryGB,
                         true
                     );
                 }
@@ -51,7 +48,7 @@ public class NoGCRegionMiddleware(RequestDelegate next)
         // if no other requests are running, end the no GC region, otherwise dont stop it as other requests need it still
         if (!OtherRequestsActive)
         {
-            if (config.EnableNoGCRegions && GCSettings.LatencyMode == GCLatencyMode.NoGCRegion)
+            if (coreConfig.EnableNoGCRegions && GCSettings.LatencyMode == GCLatencyMode.NoGCRegion)
             {
                 try
                 {

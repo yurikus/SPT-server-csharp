@@ -2,23 +2,20 @@
 using System.Net.Sockets;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 
-namespace SPTarkov.Server.Logger;
+namespace SPTarkov.Server.Middleware;
 
 public class SptLoggerMiddleware(
     RequestDelegate next,
     ServerLocalisationService serverLocalisationService,
-    ConfigServer configServer,
+    HttpConfig httpConfig,
     ISptLogger<SptLoggerMiddleware> logger
 )
 {
-    protected readonly HttpConfig HttpConfig = configServer.GetConfig<HttpConfig>();
-
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!HttpConfig.LogRequests)
+        if (!httpConfig.LogRequests)
         {
             await next(context);
             return;

@@ -12,14 +12,12 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Callbacks;
 
 [Injectable(TypePriority = OnUpdateOrder.InsuranceCallbacks)]
-public class InsuranceCallbacks(InsuranceController insuranceController, HttpResponseUtil httpResponseUtil, ConfigServer configServer)
+public class InsuranceCallbacks(InsuranceController insuranceController, HttpResponseUtil httpResponseUtil, InsuranceConfig insuranceConfig)
     : IOnUpdate
 {
-    protected readonly InsuranceConfig InsuranceConfig = configServer.GetConfig<InsuranceConfig>();
-
     public Task<bool> OnUpdate(CancellationToken stoppingToken, long secondsSinceLastRun)
     {
-        if (secondsSinceLastRun < InsuranceConfig.RunIntervalSeconds)
+        if (secondsSinceLastRun < insuranceConfig.RunIntervalSeconds)
         {
             return Task.FromResult(false);
         }

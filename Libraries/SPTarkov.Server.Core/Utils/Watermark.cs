@@ -42,12 +42,11 @@ public class WatermarkLocale(ServerLocalisationService serverLocalisationService
 [Injectable(TypePriority = OnLoadOrder.Watermark)]
 public class Watermark(
     ISptLogger<Watermark> logger,
-    ConfigServer configServer,
     ServerLocalisationService serverLocalisationService,
-    WatermarkLocale watermarkLocale
+    WatermarkLocale watermarkLocale,
+    CoreConfig coreConfig
 ) : IOnLoad
 {
-    protected readonly CoreConfig sptConfig = configServer.GetConfig<CoreConfig>();
     protected readonly List<string> text = [];
     protected string versionLabel = string.Empty;
 
@@ -55,7 +54,7 @@ public class Watermark(
     {
         var versionTag = GetVersionTag();
 
-        versionLabel = $"{sptConfig.ProjectName} {versionTag}";
+        versionLabel = $"{coreConfig.ProjectName} {versionTag}";
 
         text.Add(versionLabel);
         text.AddRange(watermarkLocale.Description);
@@ -70,9 +69,9 @@ public class Watermark(
             text.AddRange(watermarkLocale.Modding);
         }
 
-        if (sptConfig.CustomWatermarkLocaleKeys?.Count > 0)
+        if (coreConfig.CustomWatermarkLocaleKeys?.Count > 0)
         {
-            foreach (var key in sptConfig.CustomWatermarkLocaleKeys)
+            foreach (var key in coreConfig.CustomWatermarkLocaleKeys)
             {
                 text.AddRange(["", serverLocalisationService.GetText(key)]);
             }
@@ -97,7 +96,7 @@ public class Watermark(
 
         if (withEftVersion)
         {
-            var tarkovVersion = sptConfig.CompatibleTarkovVersion.Split(".").Last();
+            var tarkovVersion = coreConfig.CompatibleTarkovVersion.Split(".").Last();
             return $"{versionTag} ({tarkovVersion})";
         }
 
@@ -116,7 +115,7 @@ public class Watermark(
             ? $"{sptVersion} - BLEEDINGEDGE {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}"
             : $"{sptVersion} - {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}";
 
-        return $"{sptConfig.ProjectName} {versionTag}";
+        return $"{coreConfig.ProjectName} {versionTag}";
     }
 
     /// <summary>

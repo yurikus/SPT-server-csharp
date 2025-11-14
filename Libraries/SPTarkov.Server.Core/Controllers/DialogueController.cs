@@ -21,14 +21,13 @@ public class DialogueController(
     DialogueHelper dialogueHelper,
     NotificationSendHelper notificationSendHelper,
     ProfileHelper profileHelper,
-    ConfigServer configServer,
     SaveServer saveServer,
     ServerLocalisationService serverLocalisationService,
     MailSendService mailSendService,
+    CoreConfig coreConfig,
     IEnumerable<IDialogueChatBot> dialogueChatBots
 )
 {
-    protected readonly CoreConfig CoreConfig = configServer.GetConfig<CoreConfig>();
     protected readonly List<IDialogueChatBot> DialogueChatBots = dialogueChatBots.ToList();
 
     /// <summary>
@@ -116,7 +115,7 @@ public class DialogueController(
     {
         var activeBots = new List<UserDialogInfo>();
 
-        var chatBotConfig = CoreConfig.Features.ChatbotFeatures;
+        var chatBotConfig = coreConfig.Features.ChatbotFeatures;
 
         foreach (var bot in DialogueChatBots)
         {

@@ -32,15 +32,13 @@ public class BotController(
     SeasonalEventService seasonalEventService,
     MatchBotDetailsCacheService matchBotDetailsCacheService,
     ProfileHelper profileHelper,
-    ConfigServer configServer,
     ProfileActivityService profileActivityService,
     RandomUtil randomUtil,
+    BotConfig botConfig,
+    PmcConfig pmcConfig,
     ICloner cloner
 )
 {
-    protected readonly BotConfig botConfig = configServer.GetConfig<BotConfig>();
-    protected readonly PmcConfig pmcConfig = configServer.GetConfig<PmcConfig>();
-
     /// <summary>
     ///     Return the number of bot load-out varieties to be generated
     /// </summary>

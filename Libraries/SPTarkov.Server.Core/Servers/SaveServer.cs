@@ -2,13 +2,13 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using LogLevel = SPTarkov.Common.Models.Logging.LogLevel;
@@ -24,7 +24,7 @@ public sealed class SaveServer(
     ProfileValidatorService profileValidatorService,
     BackupService backupService,
     ISptLogger<SaveServer> logger,
-    ConfigServer configServer
+    CoreConfig coreConfig
 )
 {
     private const string profileFilepath = "user/profiles/";
@@ -269,7 +269,7 @@ public sealed class SaveServer(
 
             start = Stopwatch.StartNew();
             var jsonProfile =
-                jsonUtil.Serialize(profiles[sessionID], !configServer.GetConfig<CoreConfig>().Features.CompressProfile)
+                jsonUtil.Serialize(profiles[sessionID], !coreConfig.Features.CompressProfile)
                 ?? throw new InvalidOperationException("Could not serialize profile for saving!");
             var fmd5 = await hashUtil.GenerateHashForDataAsync(HashingAlgorithm.MD5, jsonProfile);
             if (!saveMd5.TryGetValue(sessionID, out var currentMd5) || currentMd5 != fmd5)

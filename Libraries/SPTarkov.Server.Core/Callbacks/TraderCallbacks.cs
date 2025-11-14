@@ -10,12 +10,8 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Callbacks;
 
 [Injectable(TypePriority = OnLoadOrder.TraderCallbacks)]
-public class TraderCallbacks(HttpResponseUtil httpResponseUtil, TraderController traderController, ConfigServer configServer)
-    : IOnLoad,
-        IOnUpdate
+public class TraderCallbacks(HttpResponseUtil httpResponseUtil, TraderController traderController) : IOnLoad, IOnUpdate
 {
-    protected readonly TraderConfig TraderConfig = configServer.GetConfig<TraderConfig>();
-
     public Task OnLoad(CancellationToken stoppingToken)
     {
         traderController.Load();

@@ -19,11 +19,9 @@ public class RagfairCallbacks(
     RagfairController ragfairController,
     RagfairTaxService ragfairTaxService,
     RagfairPriceService ragfairPriceService,
-    ConfigServer configServer
+    RagfairConfig ragfairConfig
 ) : IOnLoad, IOnUpdate
 {
-    protected readonly RagfairConfig RagfairConfig = configServer.GetConfig<RagfairConfig>();
-
     public Task OnLoad(CancellationToken stoppingToken)
     {
         ragfairPriceService.Load();
@@ -34,7 +32,7 @@ public class RagfairCallbacks(
 
     public Task<bool> OnUpdate(CancellationToken stoppingToken, long secondsSinceLastRun)
     {
-        if (secondsSinceLastRun < RagfairConfig.RunIntervalSeconds)
+        if (secondsSinceLastRun < ragfairConfig.RunIntervalSeconds)
         {
             // Not enough time has passed since last run, exit early
             return Task.FromResult(false);

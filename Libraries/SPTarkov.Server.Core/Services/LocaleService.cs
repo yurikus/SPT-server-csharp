@@ -8,9 +8,8 @@ using SPTarkov.Server.Core.Servers;
 namespace SPTarkov.Server.Core.Services;
 
 [Injectable(InjectionType.Singleton)]
-public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer databaseServer, ConfigServer configServer)
+public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer databaseServer, LocaleConfig localeConfig)
 {
-    protected readonly LocaleConfig LocaleConfig = configServer.GetConfig<LocaleConfig>();
     private string _chosenServerLocale = string.Empty;
     private string _chosenClientLocale = string.Empty;
 
@@ -59,9 +58,9 @@ public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer data
     {
         if (string.IsNullOrEmpty(_chosenClientLocale))
         {
-            _chosenClientLocale = string.Equals(LocaleConfig.GameLocale, "system", StringComparison.OrdinalIgnoreCase)
+            _chosenClientLocale = string.Equals(localeConfig.GameLocale, "system", StringComparison.OrdinalIgnoreCase)
                 ? GetPlatformForClientLocale()
-                : LocaleConfig.GameLocale.ToLowerInvariant(); // Use custom locale value
+                : localeConfig.GameLocale.ToLowerInvariant(); // Use custom locale value
         }
 
         return _chosenClientLocale;
@@ -76,9 +75,9 @@ public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer data
     {
         if (string.IsNullOrEmpty(_chosenServerLocale))
         {
-            _chosenServerLocale = string.Equals(LocaleConfig.ServerLocale, "system", StringComparison.OrdinalIgnoreCase)
+            _chosenServerLocale = string.Equals(localeConfig.ServerLocale, "system", StringComparison.OrdinalIgnoreCase)
                 ? GetPlatformForServerLocale()
-                : LocaleConfig.ServerLocale.ToLowerInvariant(); // Use custom locale value
+                : localeConfig.ServerLocale.ToLowerInvariant(); // Use custom locale value
         }
 
         return _chosenServerLocale;
@@ -90,7 +89,7 @@ public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer data
     /// <returns> List of locales e.g. en/fr/cn </returns>
     public HashSet<string> GetServerSupportedLocales()
     {
-        return LocaleConfig.ServerSupportedLocales;
+        return localeConfig.ServerSupportedLocales;
     }
 
     /// <summary>
@@ -99,7 +98,7 @@ public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer data
     /// <returns> Dictionary of locales e.g. en/fr/cn </returns>
     public Dictionary<string, string> GetLocaleFallbacks()
     {
-        return LocaleConfig.Fallbacks;
+        return localeConfig.Fallbacks;
     }
 
     /// <summary>
@@ -116,7 +115,7 @@ public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer data
         }
 
         var baseNameCode = platformLocale.TwoLetterISOLanguageName.ToLowerInvariant();
-        if (LocaleConfig.ServerSupportedLocales.Contains(baseNameCode))
+        if (localeConfig.ServerSupportedLocales.Contains(baseNameCode))
         {
             // Found a matching locale
             return baseNameCode;
@@ -124,7 +123,7 @@ public class LocaleService(ISptLogger<LocaleService> logger, DatabaseServer data
 
         // Check if base language (e.g. CN / EN / DE) exists
         var languageCode = platformLocale.Name.ToLowerInvariant();
-        if (LocaleConfig.ServerSupportedLocales.Contains(languageCode))
+        if (localeConfig.ServerSupportedLocales.Contains(languageCode))
         {
             if (baseNameCode == "zh")
             // Handle edge case of zh
