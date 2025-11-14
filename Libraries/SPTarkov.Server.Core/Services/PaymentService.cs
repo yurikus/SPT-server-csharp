@@ -370,8 +370,9 @@ public class PaymentService(
             moneyItemsInInventory = noLocked.ToList();
         }
 
-        // Prioritise items in stash to top of array
-        moneyItemsInInventory.Sort((a, b) => PrioritiseStashSort(a, b, pmcData.Inventory.Items, itemsInStashCache));
+        // Sort money stacks to prioritise items in stash and not in secure to top of array
+        var inventoryParent = pmcData.Inventory.Items.ToDictionary(item => item.Id.ToString(), item => item.Template);
+        moneyItemsInInventory.Sort((a, b) => PrioritiseStashSort(a, b, inventoryParent, itemsInStashCache));
 
         return moneyItemsInInventory;
     }
@@ -401,13 +402,13 @@ public class PaymentService(
     /// </summary>
     /// <param name="a"> First money stack item </param>
     /// <param name="b"> Second money stack item </param>
-    /// <param name="inventoryItems"> Players inventory items</param>
+    /// <param name="itemIdToTplCache"> item id (as string) and template id KvP</param>
     /// <param name="itemInStashCache">Cache of item IDs and if they're in stash</param>
     /// <returns> Sort order, -1 if A has priority, 1 if B has priority, 0 if they match </returns>
     protected int PrioritiseStashSort(
         Item a,
         Item b,
-        List<Item> inventoryItems,
+        Dictionary<string, MongoId> itemIdToTplCache,
         IReadOnlyDictionary<MongoId, InventoryLocation> itemInStashCache
     )
     {
@@ -441,11 +442,18 @@ public class PaymentService(
             if (aInContainer && bInContainer)
             {
                 // Containers where taking money from would inconvenience player
-                var aImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == a.ParentId);
-                var bImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == b.ParentId);
 
-                var aInDeprioContainer = InventoryConfig.DeprioritisedMoneyContainers.Contains(aImmediateParent.Template);
-                var bInDeprioContainer = InventoryConfig.DeprioritisedMoneyContainers.Contains(bImmediateParent.Template);
+                // Get template Id of items' parent so we can see if items in a container we want to de prioritise
+                var aImmediateParentTemplate = itemIdToTplCache.FirstOrDefault(item =>
+                    string.Equals(item.Key, a.ParentId, StringComparison.OrdinalIgnoreCase)
+                );
+                var bImmediateParentTemplate = itemIdToTplCache.FirstOrDefault(item =>
+                    string.Equals(item.Key, b.ParentId, StringComparison.OrdinalIgnoreCase)
+                );
+
+                // e.g. secure container
+                var aInDeprioContainer = InventoryConfig.DeprioritisedMoneyContainers.Contains(aImmediateParentTemplate.Value);
+                var bInDeprioContainer = InventoryConfig.DeprioritisedMoneyContainers.Contains(bImmediateParentTemplate.Value);
 
                 // Prioritize B
                 if (!aInDeprioContainer && bInDeprioContainer)
