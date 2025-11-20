@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Utils;
@@ -140,7 +141,7 @@ public class CertificateHelper(ISptLogger<CertificateHelper> logger, FileUtil fi
         var sanBuilder = new SubjectAlternativeNameBuilder();
         sanBuilder.AddIpAddress(IPAddress.Loopback);
         sanBuilder.AddDnsName("localhost");
-        sanBuilder.AddDnsName(Environment.MachineName);
+        sanBuilder.AddDnsName(Regex.Replace(Environment.MachineName, "[^a-zA-Z0-9_.]+", ""));
 
         var distinguishedName = new X500DistinguishedName($"CN={subjectName}");
 
