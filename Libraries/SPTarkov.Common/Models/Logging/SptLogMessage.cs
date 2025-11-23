@@ -1,3 +1,5 @@
+using Spectre.Console;
+
 namespace SPTarkov.Common.Models.Logging;
 
 public record SptLogMessage(
@@ -8,6 +10,6 @@ public record SptLogMessage(
     string? threadName,
     string Message,
     Exception? Exception = null,
-    LogTextColor? TextColor = null,
-    LogBackgroundColor? BackgroundColor = null
+    Color? TextColor = null,
+    Color? BackgroundColor = null
 );

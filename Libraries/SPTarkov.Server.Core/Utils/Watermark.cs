@@ -1,3 +1,4 @@
+using Spectre.Console;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
@@ -129,7 +130,7 @@ public class Watermark(
     /// <summary>
     ///     Draw watermark on screen
     /// </summary>
-    protected void Draw(LogTextColor color = LogTextColor.Yellow)
+    protected void Draw(Color color)
     {
         var result = new List<string>();
 

@@ -143,8 +143,6 @@ public static class Program
         forwardedHeadersOptions.KnownProxies.Clear();
         app.UseForwardedHeaders(forwardedHeadersOptions);
 
-        SetConsoleOutputMode();
-
         await app.RunAsync();
     }
 
@@ -249,33 +247,6 @@ public static class Program
             .BuildServiceProvider();
         var modValidator = provider.GetRequiredService<ModValidator>();
         return modValidator.ValidateMods(mods);
-    }
-
-    private static void SetConsoleOutputMode()
-    {
-        var disableFlag = Environment.GetEnvironmentVariable("DISABLE_VIRTUAL_TERMINAL");
-
-        if (!OperatingSystem.IsWindows() || disableFlag == "1" || string.Equals(disableFlag, "true", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        const int stdOutputHandle = -11;
-        const uint enableVirtualTerminalProcessing = 0x0004;
-
-        var handle = GetStdHandle(stdOutputHandle);
-
-        if (!GetConsoleMode(handle, out var consoleMode))
-        {
-            throw new Exception("Unable to get console mode");
-        }
-
-        consoleMode |= enableVirtualTerminalProcessing;
-
-        if (!SetConsoleMode(handle, consoleMode))
-        {
-            throw new Exception("Unable to set console mode");
-        }
     }
 
     private static bool IsRunFromInstallationFolder()

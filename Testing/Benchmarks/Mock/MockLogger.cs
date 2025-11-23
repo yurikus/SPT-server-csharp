@@ -1,10 +1,11 @@
+using Spectre.Console;
 using SPTarkov.Common.Models.Logging;
 
 namespace Benchmarks.Mock;
 
 public class MockLogger<T> : ISptLogger<T>
 {
-    public void LogWithColor(string data, LogTextColor? textColor = null, LogBackgroundColor? backgroundColor = null, Exception? ex = null)
+    public void LogWithColor(string data, Color? textColor = null, Color? backgroundColor = null, Exception? ex = null)
     {
         throw new NotImplementedException();
     }
@@ -39,13 +40,7 @@ public class MockLogger<T> : ISptLogger<T>
         Console.WriteLine(data);
     }
 
-    public void Log(
-        LogLevel level,
-        string data,
-        LogTextColor? textColor = null,
-        LogBackgroundColor? backgroundColor = null,
-        Exception? ex = null
-    )
+    public void Log(LogLevel level, string data, Color? textColor = null, Color? backgroundColor = null, Exception? ex = null)
     {
         throw new NotImplementedException();
     }
@@ -65,7 +60,7 @@ public class MockLogger<T> : ISptLogger<T>
         throw new NotImplementedException();
     }
 
-    public void LogWithColor(string data, Exception? ex = null, LogTextColor? textColor = null, LogBackgroundColor? backgroundColor = null)
+    public void LogWithColor(string data, Exception? ex = null, Color? textColor = null, Color? backgroundColor = null)
     {
         Console.WriteLine(data);
     }

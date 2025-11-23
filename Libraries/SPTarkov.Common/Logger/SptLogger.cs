@@ -1,3 +1,4 @@
+using Spectre.Console;
 using SPTarkov.Common.Models.Logging;
 using LogLevel = SPTarkov.Common.Models.Logging.LogLevel;
 
@@ -12,7 +13,7 @@ public sealed class SptLogger<T>(SptLoggerConfiguration configuration, SptLogger
         _category = category;
     }
 
-    public void LogWithColor(string data, LogTextColor? textColor = null, LogBackgroundColor? backgroundColor = null, Exception? ex = null)
+    public void LogWithColor(string data, Color? textColor = null, Color? backgroundColor = null, Exception? ex = null)
     {
         loggerQueueManager.EnqueueMessage(
             new SptLogMessage(
@@ -40,7 +41,7 @@ public sealed class SptLogger<T>(SptLoggerConfiguration configuration, SptLogger
                 Thread.CurrentThread.Name,
                 data,
                 ex,
-                LogTextColor.Green
+                Color.Green
             )
         );
     }
@@ -56,7 +57,7 @@ public sealed class SptLogger<T>(SptLoggerConfiguration configuration, SptLogger
                 Thread.CurrentThread.Name,
                 data,
                 ex,
-                LogTextColor.Red
+                Color.Red
             )
         );
     }
@@ -72,7 +73,7 @@ public sealed class SptLogger<T>(SptLoggerConfiguration configuration, SptLogger
                 Thread.CurrentThread.Name,
                 data,
                 ex,
-                LogTextColor.Yellow
+                Color.Yellow
             )
         );
     }
@@ -103,7 +104,7 @@ public sealed class SptLogger<T>(SptLoggerConfiguration configuration, SptLogger
                 Thread.CurrentThread.Name,
                 data,
                 ex,
-                LogTextColor.Gray
+                Color.Gray
             )
         );
     }
@@ -119,19 +120,13 @@ public sealed class SptLogger<T>(SptLoggerConfiguration configuration, SptLogger
                 Thread.CurrentThread.Name,
                 data,
                 ex,
-                LogTextColor.Black,
-                LogBackgroundColor.Red
+                Color.Black,
+                Color.Red
             )
         );
     }
 
-    public void Log(
-        LogLevel level,
-        string data,
-        LogTextColor? textColor = null,
-        LogBackgroundColor? backgroundColor = null,
-        Exception? ex = null
-    )
+    public void Log(LogLevel level, string data, Color? textColor = null, Color? backgroundColor = null, Exception? ex = null)
     {
         loggerQueueManager.EnqueueMessage(
             new SptLogMessage(

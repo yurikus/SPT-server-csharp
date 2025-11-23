@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Spectre.Console;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Models.Utils;
 
@@ -18,9 +19,9 @@ public record ClientLogRequest : IRequestData
 
     [JsonPropertyName("Color")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public LogTextColor? Color { get; set; }
+    public Color? Color { get; set; }
 
     [JsonPropertyName("BackgroundColor")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public LogBackgroundColor? BackgroundColor { get; set; }
+    public Color? BackgroundColor { get; set; }
 }
