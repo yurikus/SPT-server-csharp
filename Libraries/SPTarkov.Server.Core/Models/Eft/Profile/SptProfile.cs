@@ -140,7 +140,7 @@ public record UserBuild
 public record WeaponBuild : UserBuild
 {
     [JsonPropertyName("Root")]
-    public MongoId Root { get; set; }
+    public string? Root { get; set; }
 
     [JsonPropertyName("Items")]
     public List<Item>? Items { get; set; } // Same as PMC inventory items
