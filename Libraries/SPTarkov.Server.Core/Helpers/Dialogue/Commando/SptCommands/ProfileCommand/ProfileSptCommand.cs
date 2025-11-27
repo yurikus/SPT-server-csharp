@@ -59,7 +59,7 @@ public class ProfileSptCommand(ISptLogger<ProfileSptCommand> logger, MailSendSer
 
         var result = _commandRegex.Match(request.Text);
 
-        var command = result.Groups["command"].Length > 0 ? result.Groups["command"].Captures[0].Value : null;
+        var command = isExamine ? "examine" : (result.Groups["command"].Length > 0 ? result.Groups["command"].Captures[0].Value : null);
         var skill = result.Groups["skill"].Length > 0 ? result.Groups["skill"].Captures[0].Value : null;
         var quantity = int.Parse(result.Groups["quantity"].Length > 0 ? result.Groups["quantity"].Captures[0].Value : "0");
 
