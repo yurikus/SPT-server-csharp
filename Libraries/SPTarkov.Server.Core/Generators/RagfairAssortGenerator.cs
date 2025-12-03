@@ -46,7 +46,9 @@ public class RagfairAssortGenerator(
 
         // Get cloned items from db
         var blacklist = itemFilterService.GetBlacklistedItems();
-        var dbItems = databaseService.GetItems().Where(item => !string.Equals(item.Value.Type, "Node", StringComparison.OrdinalIgnoreCase) && !blacklist.Contains(item.Key));
+        var dbItems = databaseService
+            .GetItems()
+            .Where(item => !string.Equals(item.Value.Type, "Node", StringComparison.OrdinalIgnoreCase) && !blacklist.Contains(item.Key));
 
         // Store processed preset tpls so we don't add them when processing non-preset items
         HashSet<MongoId> processedArmorItems = [];
