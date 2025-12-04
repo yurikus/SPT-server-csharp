@@ -44,19 +44,22 @@ public static class Program
         {
             if (e.Message.Contains("could not load file or assembly", StringComparison.InvariantCultureIgnoreCase))
             {
-                var requirementName = e.Message;
                 Console.WriteLine(
                     "========================================================================================================="
                 );
                 Console.BackgroundColor = ConsoleColor.DarkRed;
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.WriteLine(
-                    "You may have forgotten to install a requirement for one of your mods, please check the mod page again and install any requirements listed. Read the error message below CAREFULLY for the name of the mod you need to install"
+                    "You may have forgotten to install a requirement for one of your mods, please check the mod page again and install any dependencies listed. Read the below error message CAREFULLY to find the name of the mod you need to install"
                 );
+
                 Console.ResetColor();
+                Console.WriteLine(e);
                 Console.WriteLine(
                     "========================================================================================================="
                 );
+
+                return;
             }
 
             Console.WriteLine("=========================================================================================================");
