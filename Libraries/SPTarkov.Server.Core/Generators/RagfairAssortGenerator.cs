@@ -18,6 +18,7 @@ public class RagfairAssortGenerator(
     DatabaseService databaseService,
     PresetHelper presetHelper,
     SeasonalEventService seasonalEventService,
+    ItemFilterService itemFilterService,
     ConfigServer configServer,
     ICloner cloner
 )
@@ -44,7 +45,10 @@ public class RagfairAssortGenerator(
         IEnumerable<List<Item>> results = [];
 
         // Get cloned items from db
-        var dbItems = databaseService.GetItems().Where(item => !string.Equals(item.Value.Type, "Node", StringComparison.OrdinalIgnoreCase));
+        var blacklist = itemFilterService.GetBlacklistedItems();
+        var dbItems = databaseService
+            .GetItems()
+            .Where(item => !string.Equals(item.Value.Type, "Node", StringComparison.OrdinalIgnoreCase) && !blacklist.Contains(item.Key));
 
         // Store processed preset tpls so we don't add them when processing non-preset items
         HashSet<MongoId> processedArmorItems = [];

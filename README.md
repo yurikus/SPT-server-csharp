@@ -127,6 +127,7 @@ In Rider, after installing the CSharpier plugin:
 
 We have a number of tests that are run automatically when you submit a pull request. You can run these tests locally by running The unit test sub-project. If you're adding a new feature or fixing a bug, please consider adding tests to cover your changes so that we can ensure they don't break in the future.
 
+
 ## License
 
 This project is licensed under the NCSA Open Source License. See the [LICENSE](LICENSE) file for details.

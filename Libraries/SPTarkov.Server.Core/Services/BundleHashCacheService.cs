@@ -10,6 +10,7 @@ public class BundleHashCacheService(ISptLogger<BundleHashCacheService> logger, J
     protected const string _bundleHashCachePath = "./user/cache/";
     protected const string _cacheName = "bundleHashCache.json";
     protected Dictionary<string, uint> _bundleHashes = [];
+    private readonly SemaphoreSlim _writeLock = new(1, 1);
 
     public async Task HydrateCache()
     {
@@ -29,6 +30,27 @@ public class BundleHashCacheService(ISptLogger<BundleHashCacheService> logger, J
         _bundleHashes = await jsonUtil.DeserializeFromFileAsync<Dictionary<string, uint>>(fullCachePath) ?? [];
     }
 
+    public async Task WriteCache()
+    {
+        await _writeLock.WaitAsync();
+
+        try
+        {
+            var bundleHashesSerialized = jsonUtil.Serialize(_bundleHashes);
+
+            if (bundleHashesSerialized is null)
+            {
+                return;
+            }
+
+            await fileUtil.WriteFileAsync(Path.Join(_bundleHashCachePath, _cacheName), bundleHashesSerialized);
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
+    }
+
     protected uint GetStoredValue(string key)
     {
         if (!_bundleHashes.TryGetValue(key, out var value))
@@ -43,16 +65,7 @@ public class BundleHashCacheService(ISptLogger<BundleHashCacheService> logger, J
     {
         _bundleHashes[bundlePath] = hash;
 
-        var bundleHashesSerialized = jsonUtil.Serialize(_bundleHashes);
-
-        if (bundleHashesSerialized is null)
-        {
-            return;
-        }
-
-        await fileUtil.WriteFileAsync(Path.Join(_bundleHashCachePath, _cacheName), bundleHashesSerialized);
-
-        logger.Debug($"Bundle: {bundlePath} hash stored in: ${_bundleHashCachePath}");
+        logger.Debug($"Bundle: {bundlePath} hash stored in cache");
     }
 
     /// <summary>
