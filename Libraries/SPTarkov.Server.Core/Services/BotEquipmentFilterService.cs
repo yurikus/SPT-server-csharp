@@ -275,7 +275,7 @@ public class BotEquipmentFilterService(
             // Loop over each caliber + cartridges of that type
             foreach (var (caliber, cartridges) in baseBotNode.BotInventory.Ammo)
             {
-                if (whitelist.Cartridge?.TryGetValue(caliber, out var matchingWhitelist) is null)
+                if (!whitelist.Cartridge.TryGetValue(caliber, out var matchingWhitelist))
                 // No cartridge whitelist, move to next cartridge
                 {
                     continue;
