@@ -9931,7 +9931,7 @@
         "enableChristmasHideout": true,
         "enableSanta": true
       },
-      "startDay": "12",
+      "startDay": "13",
       "startMonth": "12",
       "type": "CHRISTMAS"
     },

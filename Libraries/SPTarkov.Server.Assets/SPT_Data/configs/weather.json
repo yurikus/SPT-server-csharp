@@ -287,13 +287,13 @@
       "name": "AUTUMN_LATE",
       "startDay": "1",
       "startMonth": "11",
-      "endDay": "21",
+      "endDay": "13",
       "endMonth": "12"
     },
     {
       "seasonType": 2,
       "name": "WINTER_START",
-      "startDay": "21",
+      "startDay": "13",
       "startMonth": "12",
       "endDay": "31",
       "endMonth": "12"
