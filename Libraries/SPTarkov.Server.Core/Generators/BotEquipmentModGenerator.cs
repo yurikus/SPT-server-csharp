@@ -1822,7 +1822,8 @@ public class BotEquipmentModGenerator(
                             .Filter.All(tpl =>
                                 itemHelper.IsOfBaseclasses(tpl, whitelistedSightTypes) || itemHelper.IsOfBaseclass(tpl, BaseClasses.MOUNT)
                             )
-                    ) ?? false
+                    )
+                    ?? false
                 )
                 // Add mod to allowed list
                 {

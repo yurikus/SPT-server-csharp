@@ -585,7 +585,9 @@ public class ProfileFixerService(
                     if (profileBonus is null)
                     {
                         // No bonus in profile, add it
-                        logger.Debug($"Profile has level: {currentLevel} area: {profileArea.Type} but no bonus found, adding: {bonus.Type}");
+                        logger.Debug(
+                            $"Profile has level: {currentLevel} area: {profileArea.Type} but no bonus found, adding: {bonus.Type}"
+                        );
                         hideoutHelper.ApplyPlayerUpgradesBonus(pmcProfile, bonus);
                     }
                 }
