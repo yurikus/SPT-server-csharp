@@ -886,6 +886,21 @@ public class HideoutController(
                 serverLocalisationService.GetText("inventory-no_stash_space"),
                 BackendErrorCodes.NotEnoughSpace
             );
+
+            return;
+        }
+
+        // Add the crafting result to the stash, marked as FiR
+        var addItemsRequest = new AddItemsDirectRequest
+        {
+            ItemsWithModsToAdd = itemAndChildrenToSendToPlayer,
+            FoundInRaid = true,
+            UseSortingTable = false,
+            Callback = null,
+        };
+        inventoryHelper.AddItemsToStash(sessionID, addItemsRequest, pmcData, output);
+        if (output.Warnings?.Count > 0)
+        {
             return;
         }
 
@@ -908,24 +923,10 @@ public class HideoutController(
             }
         }
 
-        // Add the crafting result to the stash, marked as FiR
-        var addItemsRequest = new AddItemsDirectRequest
-        {
-            ItemsWithModsToAdd = itemAndChildrenToSendToPlayer,
-            FoundInRaid = true,
-            UseSortingTable = false,
-            Callback = null,
-        };
-        inventoryHelper.AddItemsToStash(sessionID, addItemsRequest, pmcData, output);
-        if (output.Warnings?.Count > 0)
-        {
-            return;
-        }
-
-        //  - increment skill point for crafting
-        //  - delete the production in profile Hideout.Production
+        //  - Increment skill point for crafting
+        //  - Delete the production in profile Hideout.Production
         // Hideout Management skill
-        // ? use a configuration variable for the value?
+        // ? Use a configuration variable for the value?
         var globals = databaseService.GetGlobals();
         profileHelper.AddSkillPointsToPlayer(
             pmcData,
