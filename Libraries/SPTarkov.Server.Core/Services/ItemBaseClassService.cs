@@ -47,7 +47,7 @@ public class ItemBaseClassService(
 
         if (!itemDb.TryGetValue(itemTpl, out var item))
         {
-            logger.Error($"Could not add {itemTpl} to cache, it does not exist in the item database!");
+            logger.Debug($"Could not add {itemTpl} to cache, it does not exist in the item database!");
             return;
         }
 
@@ -106,12 +106,6 @@ public class ItemBaseClassService(
         var existsInCache = _itemBaseClassesCache.TryGetValue(itemTpl, out var baseClassList);
         if (!existsInCache)
         {
-            // Not found
-            if (logger.IsLogEnabled(LogLevel.Debug))
-            {
-                logger.Debug(serverLocalisationService.GetText("baseclass-item_not_found", itemTpl.ToString()));
-            }
-
             // Not found in cache, attempt to add first
             AddItemToCache(itemTpl);
 
@@ -153,12 +147,6 @@ public class ItemBaseClassService(
         var existsInCache = _itemBaseClassesCache.TryGetValue(itemTpl, out var baseClassList);
         if (!existsInCache)
         {
-            // Not found
-            if (logger.IsLogEnabled(LogLevel.Debug))
-            {
-                logger.Debug(serverLocalisationService.GetText("baseclass-item_not_found", itemTpl.ToString()));
-            }
-
             // Not found in cache, attempt to add first
             AddItemToCache(itemTpl);
 
