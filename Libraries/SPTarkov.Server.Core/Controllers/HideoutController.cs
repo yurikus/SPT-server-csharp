@@ -779,23 +779,23 @@ public class HideoutController(
         ItemEventRouterResponse output
     )
     {
-        // Validate that we have a matching production
-        var productionDict = pmcData.Hideout.Production;
+        // Find craft/production in player profile
         MongoId? prodId = null;
-        foreach (var (productionId, production) in productionDict)
+        foreach (var (productionId, productionInProfile) in pmcData.Hideout.Production)
         {
-            // Skip undefined production objects
-            if (production is null)
+            // Skip undefined production objects caused by continious crafts
+            if (productionInProfile is null)
             {
                 continue;
             }
 
-            if (production.RecipeId != request.RecipeId)
+            // Not craft we're looking for
+            if (productionInProfile.RecipeId != request.RecipeId)
             {
                 continue;
             }
 
-            // Production or ScavCase
+            // Could be Production or ScavCase
             prodId = productionId; // Set to objects key
             break;
         }
@@ -815,7 +815,6 @@ public class HideoutController(
 
         // Variables for management of skill
         var craftingExpAmount = 0;
-
         var counterHoursCrafting = GetCustomSptHoursCraftingTaskConditionCounter(pmcData, recipe);
         var totalCraftingHours = counterHoursCrafting.Value;
 
@@ -884,6 +883,21 @@ public class HideoutController(
                 serverLocalisationService.GetText("inventory-no_stash_space"),
                 BackendErrorCodes.NotEnoughSpace
             );
+
+            return;
+        }
+
+        // Add the crafting result to the stash, marked as FiR
+        var addItemsRequest = new AddItemsDirectRequest
+        {
+            ItemsWithModsToAdd = itemAndChildrenToSendToPlayer,
+            FoundInRaid = true,
+            UseSortingTable = false,
+            Callback = null,
+        };
+        inventoryHelper.AddItemsToStash(sessionID, addItemsRequest, pmcData, output);
+        if (output.Warnings?.Count > 0)
+        {
             return;
         }
 
@@ -906,24 +920,10 @@ public class HideoutController(
             }
         }
 
-        // Add the crafting result to the stash, marked as FiR
-        var addItemsRequest = new AddItemsDirectRequest
-        {
-            ItemsWithModsToAdd = itemAndChildrenToSendToPlayer,
-            FoundInRaid = true,
-            UseSortingTable = false,
-            Callback = null,
-        };
-        inventoryHelper.AddItemsToStash(sessionID, addItemsRequest, pmcData, output);
-        if (output.Warnings?.Count > 0)
-        {
-            return;
-        }
-
-        //  - increment skill point for crafting
-        //  - delete the production in profile Hideout.Production
+        //  - Increment skill point for crafting
+        //  - Delete the production in profile Hideout.Production
         // Hideout Management skill
-        // ? use a configuration variable for the value?
+        // ? Use a configuration variable for the value?
         var globals = databaseService.GetGlobals();
         profileHelper.AddSkillPointsToPlayer(
             pmcData,

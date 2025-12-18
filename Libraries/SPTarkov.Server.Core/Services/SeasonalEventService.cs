@@ -512,7 +512,18 @@ public class SeasonalEventService(
             AdjustBotAppearanceValues(eventType.Type);
         }
 
+        if (eventType.Settings?.EnableRundansEvent ?? false)
+        {
+            EnableRunnansEvent(databaseService.GetGlobals());
+        }
+
         ChangeBtrToTarColaSkin();
+    }
+
+    protected void EnableRunnansEvent(Globals globals)
+    {
+        globals.Configuration.RunddansSettings.Active = true;
+        globals.Configuration.RunddansSettings.ActivePVE = true;
     }
 
     private void ChangeBtrToTarColaSkin()

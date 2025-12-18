@@ -104,10 +104,10 @@ public class LocationLifecycleService(
             ServerSettings = databaseService.GetLocationServices(), // TODO - is this per map or global?
             Profile = new ProfileInsuredItems { InsuredItems = playerProfile.CharacterData.PmcData.InsuredItems },
             LocationLoot = GenerateLocationAndLoot(sessionId, request.Location, !request.ShouldSkipLootGeneration ?? true),
-            TransitionType = TransitionType.NONE,
+            TransitionType = request.TransitionType,
             Transition = new Transition
             {
-                TransitionType = TransitionType.NONE,
+                TransitionType = request.TransitionType,
                 TransitionRaidId = new MongoId(),
                 TransitionCount = 0,
                 VisitedLocations = [],
@@ -128,7 +128,7 @@ public class LocationLifecycleService(
         if (transitionData is not null)
         {
             logger.Success($"Player: {sessionId} is in transit to {request.Location}");
-            result.Transition.TransitionType = TransitionType.COMMON;
+            result.Transition.TransitionType = request.TransitionType;
             result.Transition.TransitionRaidId = transitionData.TransitionRaidId;
             result.Transition.TransitionCount += 1;
 

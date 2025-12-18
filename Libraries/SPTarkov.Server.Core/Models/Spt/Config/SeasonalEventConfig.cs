@@ -140,6 +140,9 @@ public record SeasonalEventSettings
 
     [JsonPropertyName("disableWaves")]
     public List<string>? DisableWaves { get; set; }
+
+    [JsonPropertyName("enableRundansEvent")]
+    public bool? EnableRundansEvent { get; set; }
 }
 
 public record ZombieSettings
