@@ -771,7 +771,7 @@ public class RepeatableQuestController(
     /// <returns>True if unlocked</returns>
     protected bool PlayerHasDailyScavQuestsUnlocked(PmcData pmcData)
     {
-        if (pmcData.TradersInfo.TryGetValue("579dc571d53a0658a154fbec", out TraderInfo fence))
+        if (pmcData.TradersInfo.TryGetValue("579dc571d53a0658a154fbec", out var fence))
         {
             if (fence.Unlocked is not null && !fence.Unlocked.Value)
             {
