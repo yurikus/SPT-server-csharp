@@ -41,13 +41,11 @@ public class ItemBaseClassService(
 
     public void AddItemToCache(MongoId itemTpl)
     {
-        logger.Debug($"Adding {itemTpl} to cache");
-
         var itemDb = databaseService.GetItems();
 
         if (!itemDb.TryGetValue(itemTpl, out var item))
         {
-            logger.Debug($"Could not add {itemTpl} to cache, it does not exist in the item database!");
+            logger.Error($"Could not add {itemTpl} to cache, it does not exist in the item database!");
             return;
         }
 

@@ -59,9 +59,11 @@ public sealed class SPTStartupHostedService(
                     logger.Warning("Pagefile size is 0 GB, you may encounter out of memory errors when loading into raids");
                 }
                 logger.Debug($"RAM: {totalMemoryGb:F2} GB");
-                if (totalMemoryGb <= 16)
+                if (totalMemoryGb < 30)
                 {
-                    logger.Warning("RAM size is below recommended, you may encounter out of memory errors when loading into raids");
+                    logger.Warning(
+                        $"Detected RAM ({totalMemoryGb:F2}GB) is smaller than recommended (32GB) you may experience crashes or reduced FPS on large maps"
+                    );
                 }
                 logger.Debug($"Ran as admin: {Environment.IsPrivilegedProcess}");
                 logger.Debug($"CPU cores: {Environment.ProcessorCount}");
