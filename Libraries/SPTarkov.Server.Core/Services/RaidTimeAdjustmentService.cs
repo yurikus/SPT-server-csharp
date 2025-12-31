@@ -7,6 +7,7 @@ using SPTarkov.Server.Core.Models.Eft.Game;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Location;
+using SPTarkov.Server.Core.Models.Spt.Logging;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
@@ -35,9 +36,12 @@ public class RaidTimeAdjustmentService(
     {
         if (raidAdjustments.DynamicLootPercent < 100 || raidAdjustments.StaticLootPercent < 100)
         {
-            logger.Debug(
-                $"Adjusting dynamic loot multipliers to {raidAdjustments.DynamicLootPercent}% and static loot multipliers to {raidAdjustments.StaticLootPercent}% of original"
+            if (logger.IsLogEnabled(LogLevel.Debug))
+            {
+                logger.Debug(
+                $"Adjusting dynamic loot multipliers to: {raidAdjustments.DynamicLootPercent}% and static loot multipliers to: {raidAdjustments.StaticLootPercent}% of original"
             );
+            }
         }
 
         // Change loot multiplier values before they're used below
@@ -60,7 +64,10 @@ public class RaidTimeAdjustmentService(
             var exitToChange = mapBase.Exits.FirstOrDefault(exit => exit.Name == exitChange.Name);
             if (exitToChange is null)
             {
-                logger.Debug($"Exit with Id: {exitChange.Name} not found, skipping");
+                if (logger.IsLogEnabled(LogLevel.Debug))
+                {
+                    logger.Debug($"Exit with Id: {exitChange.Name} not found, skipping");
+                }
 
                 return;
             }
@@ -123,10 +130,11 @@ public class RaidTimeAdjustmentService(
             wave.TimeMin -= (int)Math.Max(startSeconds, 0);
             wave.TimeMax -= (int)Math.Max(startSeconds, 0);
         }
-
-        logger.Debug(
-            $"Removed: {originalWaveCount - mapBase.Waves.Count} wave from map due to simulated raid start time of {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
+        if (logger.IsLogEnabled(LogLevel.Debug)) {
+            logger.Debug(
+            $"Removed: {originalWaveCount - mapBase.Waves.Count} wave from map due to simulated raid start time of: {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
         );
+        }
     }
 
     /// <summary>
@@ -170,12 +178,16 @@ public class RaidTimeAdjustmentService(
                 spawn.Time = (double)Math.Max(spawn.Time.GetValueOrDefault(1) - pmcStartSeconds, 1);
             }
 
-            logger.Debug($"Offset PMC spawns by {pmcStartSeconds} seconds");
+            if (logger.IsLogEnabled(LogLevel.Debug))
+            {
+                logger.Debug($"Offset PMC spawns by: {pmcStartSeconds} seconds");
+            }
         }
-
-        logger.Debug(
-            $"Removed: {originalPmcWaveCount - mapBase.BossLocationSpawn.Count} boss waves from map due to simulated raid start time of {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
+        if (logger.IsLogEnabled(LogLevel.Debug)) {
+            logger.Debug(
+            $"Removed: {originalPmcWaveCount - mapBase.BossLocationSpawn.Count} boss waves from map due to simulated raid start time of: {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
         );
+        }
     }
 
     /// <summary>
@@ -223,17 +235,17 @@ public class RaidTimeAdjustmentService(
         var raidTimeRemainingPercent = 100 - chosenRaidReductionPercent;
 
         // How many minutes raid will last
-        var newRaidTimeMinutes = Math.Floor(randomUtil.ReduceValueByPercent(baseEscapeTimeMinutes ?? 1, chosenRaidReductionPercent));
+        var newRaidTimeMinutes = Math.Floor(randomUtil.ReduceValueByPercent(baseEscapeTimeMinutes ?? 1d, chosenRaidReductionPercent));
 
         // Time player spawns into the raid if it was online
         var simulatedRaidStartTimeMinutes = baseEscapeTimeMinutes - newRaidTimeMinutes;
-        result.SimulatedRaidStartSeconds = simulatedRaidStartTimeMinutes * 60;
+        result.SimulatedRaidStartSeconds = simulatedRaidStartTimeMinutes * 60d;
         result.RaidTimeMinutes = newRaidTimeMinutes;
 
-        // Calculate how long player needs to be in raid to get a `survived` extract status
+        // Calculate how long player needs to be in raid to get a `survived` extract status, never falls below 0
         result.NewSurviveTimeSeconds = Math.Max(
-            result.OriginalSurvivalTimeSeconds.Value - (baseEscapeTimeMinutes.Value - newRaidTimeMinutes) * 60,
-            0
+            (result.OriginalSurvivalTimeSeconds - ((baseEscapeTimeMinutes - newRaidTimeMinutes) * 60)) ?? 0d,
+            0d
         );
 
         if (mapSettings.ReduceLootByPercent)
@@ -242,16 +254,13 @@ public class RaidTimeAdjustmentService(
             result.StaticLootPercent = Math.Max(raidTimeRemainingPercent, mapSettings.MinStaticLootPercent);
         }
 
-        logger.Debug($"Reduced: {request.Location} raid time by: {chosenRaidReductionPercent}% to {newRaidTimeMinutes} minutes");
-
-        // Calculate how long player needs to be in raid to get a `survived` extract status
-        result.NewSurviveTimeSeconds = Math.Max(
-            result.OriginalSurvivalTimeSeconds - (baseEscapeTimeMinutes - newRaidTimeMinutes) * 60 ?? 0,
-            0D
-        );
-
+        if (logger.IsLogEnabled(LogLevel.Debug))
+        {
+            logger.Debug($"Reduced: {request.Location} raid time by: {chosenRaidReductionPercent}% to {newRaidTimeMinutes} minutes");
+        }
+            
         var exitAdjustments = GetExitAdjustments(mapBase, newRaidTimeMinutes);
-        if (exitAdjustments.Any())
+        if (exitAdjustments.Count != 0)
         {
             result.ExitChanges.AddRange(exitAdjustments);
         }
@@ -336,9 +345,12 @@ public class RaidTimeAdjustmentService(
             {
                 exitChange.Chance = 0;
 
-                logger.Debug(
-                    $"Train Exit: {exit.Name} disabled as new raid time {newRaidTimeMinutes} minutes is below {mostPossibleTimeRemainingAfterDeparture} minutes"
+                if (logger.IsLogEnabled(LogLevel.Debug))
+                {
+                    logger.Debug(
+                    $"Train Exit: {exit.Name} disabled as new raid time: {newRaidTimeMinutes} minutes is below: {mostPossibleTimeRemainingAfterDeparture} minutes"
                 );
+                }
 
                 result.Add(exitChange);
 
@@ -349,7 +361,10 @@ public class RaidTimeAdjustmentService(
             exitChange.MinTime = Math.Max(exit.MinTime - reductionSeconds ?? 0, 0);
             exitChange.MaxTime = Math.Max(exit.MaxTime - reductionSeconds ?? 0, 0);
 
-            logger.Debug($"Train appears between: {exitChange.MinTime} and {exitChange.MaxTime} seconds raid time");
+            if (logger.IsLogEnabled(LogLevel.Debug))
+            { 
+                logger.Debug($"Train appears between: {exitChange.MinTime} and: {exitChange.MaxTime} seconds raid time");
+            }
 
             result.Add(exitChange);
         }
