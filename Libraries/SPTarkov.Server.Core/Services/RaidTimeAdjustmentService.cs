@@ -39,8 +39,8 @@ public class RaidTimeAdjustmentService(
             if (logger.IsLogEnabled(LogLevel.Debug))
             {
                 logger.Debug(
-                $"Adjusting dynamic loot multipliers to: {raidAdjustments.DynamicLootPercent}% and static loot multipliers to: {raidAdjustments.StaticLootPercent}% of original"
-            );
+                    $"Adjusting dynamic loot multipliers to: {raidAdjustments.DynamicLootPercent}% and static loot multipliers to: {raidAdjustments.StaticLootPercent}% of original"
+                );
             }
         }
 
@@ -130,10 +130,11 @@ public class RaidTimeAdjustmentService(
             wave.TimeMin -= (int)Math.Max(startSeconds, 0);
             wave.TimeMax -= (int)Math.Max(startSeconds, 0);
         }
-        if (logger.IsLogEnabled(LogLevel.Debug)) {
+        if (logger.IsLogEnabled(LogLevel.Debug))
+        {
             logger.Debug(
-            $"Removed: {originalWaveCount - mapBase.Waves.Count} wave from map due to simulated raid start time of: {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
-        );
+                $"Removed: {originalWaveCount - mapBase.Waves.Count} wave from map due to simulated raid start time of: {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
+            );
         }
     }
 
@@ -183,10 +184,11 @@ public class RaidTimeAdjustmentService(
                 logger.Debug($"Offset PMC spawns by: {pmcStartSeconds} seconds");
             }
         }
-        if (logger.IsLogEnabled(LogLevel.Debug)) {
+        if (logger.IsLogEnabled(LogLevel.Debug))
+        {
             logger.Debug(
-            $"Removed: {originalPmcWaveCount - mapBase.BossLocationSpawn.Count} boss waves from map due to simulated raid start time of: {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
-        );
+                $"Removed: {originalPmcWaveCount - mapBase.BossLocationSpawn.Count} boss waves from map due to simulated raid start time of: {raidAdjustments.SimulatedRaidStartSeconds / 60} minutes"
+            );
         }
     }
 
@@ -258,7 +260,7 @@ public class RaidTimeAdjustmentService(
         {
             logger.Debug($"Reduced: {request.Location} raid time by: {chosenRaidReductionPercent}% to {newRaidTimeMinutes} minutes");
         }
-            
+
         var exitAdjustments = GetExitAdjustments(mapBase, newRaidTimeMinutes);
         if (exitAdjustments.Count != 0)
         {
@@ -348,8 +350,8 @@ public class RaidTimeAdjustmentService(
                 if (logger.IsLogEnabled(LogLevel.Debug))
                 {
                     logger.Debug(
-                    $"Train Exit: {exit.Name} disabled as new raid time: {newRaidTimeMinutes} minutes is below: {mostPossibleTimeRemainingAfterDeparture} minutes"
-                );
+                        $"Train Exit: {exit.Name} disabled as new raid time: {newRaidTimeMinutes} minutes is below: {mostPossibleTimeRemainingAfterDeparture} minutes"
+                    );
                 }
 
                 result.Add(exitChange);
@@ -362,7 +364,7 @@ public class RaidTimeAdjustmentService(
             exitChange.MaxTime = Math.Max(exit.MaxTime - reductionSeconds ?? 0, 0);
 
             if (logger.IsLogEnabled(LogLevel.Debug))
-            { 
+            {
                 logger.Debug($"Train appears between: {exitChange.MinTime} and: {exitChange.MaxTime} seconds raid time");
             }
 
