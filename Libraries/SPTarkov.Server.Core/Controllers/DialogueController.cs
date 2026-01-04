@@ -59,7 +59,7 @@ public class DialogueController(
                 continue;
             }
 
-            RemoveExpiredItemsFromMessages(sessionId);
+            ProcessExpiredInsurance(sessionId);
         }
     }
 
@@ -537,23 +537,23 @@ public class DialogueController(
     }
 
     /// <summary>
-    ///     Delete expired items from all messages in player profile. triggers when updating traders.
+    ///     Delete expired items from all messages in player profile + send expired messages. triggers when updating traders.
     /// </summary>
     /// <param name="sessionId">Session id</param>
-    protected void RemoveExpiredItemsFromMessages(MongoId sessionId)
+    protected void ProcessExpiredInsurance(MongoId sessionId)
     {
         foreach (var (dialogId, _) in dialogueHelper.GetDialogsForProfile(sessionId))
         {
-            RemoveExpiredItemsFromMessage(sessionId, dialogId);
+            SendExpiredInsuranceMessages(sessionId, dialogId);
         }
     }
 
     /// <summary>
-    ///     Removes expired items from a message in player profile
+    ///     Send expired insurance messages and remove expired items from messages
     /// </summary>
     /// <param name="sessionId">Session id</param>
-    /// <param name="dialogueId">Dialog id</param>
-    protected void RemoveExpiredItemsFromMessage(MongoId sessionId, MongoId dialogueId)
+    /// <param name="dialogueId">Trader dialog id</param>
+    protected void SendExpiredInsuranceMessages(MongoId sessionId, MongoId dialogueId)
     {
         var dialogs = dialogueHelper.GetDialogsForProfile(sessionId);
         if (!dialogs.TryGetValue(dialogueId, out var dialog))
