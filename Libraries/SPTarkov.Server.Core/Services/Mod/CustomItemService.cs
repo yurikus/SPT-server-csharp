@@ -36,7 +36,7 @@ public class CustomItemService(
         var tables = databaseService.GetTables();
 
         // Generate new id for item if none supplied
-        var newItemId = GetOrGenerateIdForItem(newItemDetails.NewId);
+        var newItemId = newItemDetails.NewId;
 
         // Fail if itemId already exists
         if (tables.Templates.Items.TryGetValue(newItemId, out var item))
@@ -49,12 +49,13 @@ public class CustomItemService(
         }
 
         // Clone existing item
-        tables.Templates.Items.TryGetValue(newItemDetails.ItemTplToClone.Value, out var itemToClone);
+        tables.Templates.Items.TryGetValue(newItemDetails.ItemTplToClone, out var itemToClone);
         var itemClone = cloner.Clone(itemToClone);
 
         // Update id and parentId of item
         itemClone.Id = newItemId;
         itemClone.Parent = newItemDetails.ParentId;
+        itemClone.Name = newItemDetails.NewItemName;
 
         UpdateBaseItemPropertiesWithOverrides(newItemDetails.OverrideProperties, itemClone);
 
@@ -132,7 +133,7 @@ public class CustomItemService(
     /// </summary>
     /// <param name="newId"> ID supplied to code </param>
     /// <returns> ItemID </returns>
-    protected MongoId GetOrGenerateIdForItem(string newId)
+    protected MongoId GetOrGenerateIdForItem(string? newId)
     {
         return string.IsNullOrEmpty(newId) ? new MongoId() : new MongoId(newId);
     }

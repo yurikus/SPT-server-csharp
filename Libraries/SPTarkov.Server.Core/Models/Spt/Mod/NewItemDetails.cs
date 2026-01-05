@@ -16,7 +16,7 @@ public record NewItemFromCloneDetails : NewItemDetailsBase
     ///     Id of the item to copy and use as a base
     /// </summary>
     [JsonPropertyName("itemTplToClone")]
-    public MongoId? ItemTplToClone { get; set; }
+    public required MongoId ItemTplToClone { get; set; }
 
     /// <summary>
     ///     Item properties that should be applied over the top of the cloned base
@@ -28,14 +28,18 @@ public record NewItemFromCloneDetails : NewItemDetailsBase
     ///     ParentId for the new item (item type)
     /// </summary>
     [JsonPropertyName("parentId")]
-    public string? ParentId { get; set; }
+    public required MongoId ParentId { get; set; }
 
     /// <summary>
-    ///     the id the new item should have, leave blank to have one generated for you.
-    ///     This is often known as the TplId, or TemplateId
+    ///     The id the new item should have. This is often known as the TplId, or TemplateId
     /// </summary>
     [JsonPropertyName("newId")]
-    public string? NewId { get; set; } = "";
+    public required MongoId NewId { get; set; }
+
+    /// <summary>
+    /// The new name to assign the item, this is typically something like weapon_colt_m4a1_556x45
+    /// </summary>
+    public required string NewItemName { get; set; }
 }
 
 public record NewItemDetailsBase
