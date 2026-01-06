@@ -1033,7 +1033,10 @@ public class RagfairController(
             playerOffer.EndTime = (long?)Math.Round((double)newEndTime);
         }
 
-        logger.Debug($"Flagged player offer: {offerId} for expiry in: {TimeSpan.FromTicks(playerOffer.EndTime.Value).ToString()}");
+        if (logger.IsLogEnabled(LogLevel.Debug))
+        {
+            logger.Debug($"Flagged player: {sessionId} offer: {offerId} for expiry in: {TimeSpan.FromSeconds(playerOffer.EndTime.Value).ToString()}");
+        }
 
         return output;
     }
